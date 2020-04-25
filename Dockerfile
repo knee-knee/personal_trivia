@@ -1,8 +1,8 @@
 FROM golang:latest
 RUN mkdir /app
 ADD . /app/
-ENV AWS_ACCESS_KEY_ID=AKIAR6SJ4ZBELWQB4HVU
-ENV AWS_SECRET_ACCESS_KEY=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
+ENV AWS_ACCESS_KEY_ID=*************************
+ENV AWS_SECRET_ACCESS_KEY=*****************************
 WORKDIR /app
 EXPOSE 8080
 RUN go build -o main .
