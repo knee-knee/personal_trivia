@@ -39,5 +39,8 @@ github.com/aws/aws-sdk-go/service/dynamodb
 github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
+# github.com/gorilla/mux v1.7.4
+## explicit
+github.com/gorilla/mux
 # github.com/jmespath/go-jmespath v0.3.0
 github.com/jmespath/go-jmespath
