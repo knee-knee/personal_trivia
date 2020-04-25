@@ -2,12 +2,11 @@ package routes
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"log"
 	"net/http"
 
-	"github.com/personal_trivia/repo"
-
 	"github.com/gorilla/mux"
+	"github.com/personal_trivia/repo"
 )
 
 type Question struct {
@@ -41,6 +40,7 @@ func questionFromDynamo(resp repo.Question) Question {
 }
 
 func (r *Routes) Question(w http.ResponseWriter, req *http.Request) {
+	log.Println("routes: Starting to fetch question")
 	params := mux.Vars(req)
 	questionID := params["id"]
 	resp, err := r.Repo.GetQuestion(questionID)
@@ -61,15 +61,13 @@ func (r *Routes) Question(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Routes) CreateQuestion(w http.ResponseWriter, req *http.Request) {
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		http.Error(w, "could not read request", 500)
-	}
-
+	log.Println("routes: Starting to create a question")
 	var in Question
-	if err := json.Unmarshal(body, &in); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&in); err != nil {
 		http.Error(w, "could not unmarshal input", 500)
 	}
+
+	defer req.Body.Close()
 
 	resp, err := r.Repo.CreateQuestion(in.ToDynamo())
 	if err != nil {

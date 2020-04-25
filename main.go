@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Now strarting the web server")
+	log.Println("Now strarting the web server")
 	repo := repo.New()
 	routes := routes.New(repo)
 	r := mux.NewRouter()
