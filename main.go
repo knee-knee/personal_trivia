@@ -17,6 +17,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", helloWorld).Methods(http.MethodGet)
 	r.HandleFunc("/questions/{id}", routes.Question).Methods(http.MethodGet)
+	r.HandleFunc("/question", routes.CreateQuestion)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

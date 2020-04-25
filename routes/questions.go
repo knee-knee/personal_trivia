@@ -48,3 +48,12 @@ func (r *Routes) Question(w http.ResponseWriter, req *http.Request) {
 
 	w.Write(body)
 }
+
+func (r *Routes) CreateQuestion(w http.ResponseWriter, req *http.Request) {
+	resp, err := r.Repo.CreateQuestion()
+	if err != nil {
+		http.Error(w, "could not create the question", 500)
+	}
+
+	w.Write([]byte(resp))
+}
