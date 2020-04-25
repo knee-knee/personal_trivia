@@ -22,21 +22,6 @@ type Question struct {
 
 func (r *Repo) GetQuestion(questionID string) (Question, error) {
 	log.Printf("Getting question with ID %s. \n", questionID)
-
-	// queryOutput, err := r.svc.Query(&dynamodb.QueryInput{
-	// 	TableName: aws.String("personal-triviaQuestions"),
-	// 	Limit:     aws.Int64(1),
-	// 	KeyConditions: map[string]*dynamodb.Condition{
-	// 		"ID": {
-	// 			ComparisonOperator: aws.String("EQ"), // this is how we are comparing so here it is equals
-	// 			AttributeValueList: []*dynamodb.AttributeValue{
-	// 				{
-	// 					S: aws.String(questionID),
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// })
 	queryOutput, err := r.svc.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String("personal-triviaQuestions"),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -44,16 +29,6 @@ func (r *Repo) GetQuestion(questionID string) (Question, error) {
 				S: aws.String(questionID),
 			},
 		},
-		// KeyConditions: map[string]*dynamodb.Condition{
-		// 	"ID": {
-		// 		ComparisonOperator: aws.String("EQ"), // this is how we are comparing so here it is equals
-		// 		AttributeValueList: []*dynamodb.AttributeValue{
-		// 			{
-		// 				S: aws.String(questionID),
-		// 			},
-		// 		},
-		// 	},
-		// },
 	})
 	if err != nil {
 		return Question{}, errors.New("could not retrieve question from dynamo")
