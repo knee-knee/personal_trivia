@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/personal_trivia/repo"
@@ -15,7 +16,17 @@ type Question struct {
 	AnwserB       string `json:"anwserB"`
 	AnwserC       string `json:"anwserC"`
 	AnwserD       string `json:"anwserD"`
-	CorrectAnwser string `json:"correct_anwser"`
+	CorrectAnwser string `json:"correct_anwser,omitempty"`
+}
+
+func (q Question) ToDynamo() repo.Question {
+	return repo.Question{
+		Question: q.Question,
+		AnwserA:  q.AnwserA,
+		AnwserB:  q.AnwserB,
+		AnwserC:  q.AnwserC,
+		AnwserD:  q.AnwserD,
+	}
 }
 
 func questionFromDynamo(resp repo.Question) Question {
@@ -50,7 +61,17 @@ func (r *Routes) Question(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Routes) CreateQuestion(w http.ResponseWriter, req *http.Request) {
-	resp, err := r.Repo.CreateQuestion()
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		http.Error(w, "could not read request", 500)
+	}
+
+	var in Question
+	if err := json.Unmarshal(body, &in); err != nil {
+		http.Error(w, "could not unmarshal input", 500)
+	}
+
+	resp, err := r.Repo.CreateQuestion(in.ToDynamo())
 	if err != nil {
 		http.Error(w, "could not create the question", 500)
 	}

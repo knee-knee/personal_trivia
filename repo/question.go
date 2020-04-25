@@ -45,15 +45,8 @@ func (r *Repo) GetQuestion(questionID string) (Question, error) {
 	return questions[0], nil
 }
 
-func (r *Repo) CreateQuestion() (string, error) {
-	in := Question{
-		Question: "When is Javier's birthday",
-		AnwserA:  "He never existed",
-		AnwserB:  "June 10th",
-		AnwserC:  "August 11th",
-		AnwserD:  "May 10th",
-		ID:       uuid.New().String(),
-	}
+func (r *Repo) CreateQuestion(in Question) (string, error) {
+	in.ID = uuid.New().String()
 	item, err := dynamodbattribute.MarshalMap(in)
 	putInput := &dynamodb.PutItemInput{
 		TableName: aws.String("personal-triviaQuestions"),
