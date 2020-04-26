@@ -37,3 +37,26 @@ func (r *Repo) CreateUser(in User) (string, error) {
 
 	return in.ID, nil
 }
+
+func (r *Repo) GetUser(userID string) (User, error) {
+	log.Printf("Getting user with ID %s. \n", userID)
+	queryOutput, err := r.svc.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String("personal-triviaUsers"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"ID": {
+				S: aws.String(userID),
+			},
+		},
+	})
+	if err != nil {
+		return User{}, errors.New("could not retrieve user from dynamo")
+	}
+
+	log.Println("Successfully retrieved user from dynamo.")
+
+	user := User{}
+	if err := dynamodbattribute.UnmarshalMap(queryOutput.Item, &user); err != nil {
+		return User{}, err
+	}
+	return user, nil
+}

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/personal_trivia/middleware"
 	"github.com/personal_trivia/repo"
 	"github.com/personal_trivia/routes"
 )
@@ -14,14 +15,15 @@ func main() {
 	log.Println("Now strarting the web server")
 	repo := repo.New()
 	routes := routes.New(repo)
+	mw := middleware.New(repo)
 	r := mux.NewRouter()
 	// landing page
 	r.HandleFunc("/", helloWorld).Methods(http.MethodGet)
 
 	// questions
-	r.HandleFunc("/question/{id}", routes.Question).Methods(http.MethodGet)
-	r.HandleFunc("/question/{id}", routes.CheckAnswer).Methods(http.MethodPost)
-	r.HandleFunc("/question", routes.CreateQuestion).Methods(http.MethodPost)
+	r.Handle("/question/{id}", mw.AuthMiddleware(routes.Question)).Methods(http.MethodGet)
+	r.Handle("/question/{id}", mw.AuthMiddleware(routes.CheckAnswer)).Methods(http.MethodPost)
+	r.Handle("/question", mw.AuthMiddleware(routes.CreateQuestion)).Methods(http.MethodPost)
 
 	// users
 	r.HandleFunc("/signup", routes.CreateUser).Methods(http.MethodPost)
