@@ -16,7 +16,8 @@ func main() {
 	routes := routes.New(repo)
 	r := mux.NewRouter()
 	r.HandleFunc("/", helloWorld).Methods(http.MethodGet)
-	r.HandleFunc("/questions/{id}", routes.Question).Methods(http.MethodGet)
+	r.HandleFunc("/question/{id}", routes.Question).Methods(http.MethodGet)
+	r.HandleFunc("/question/{id}", routes.CheckAnswer).Methods(http.MethodPost)
 	r.HandleFunc("/question", routes.CreateQuestion).Methods(http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(":8080", r))

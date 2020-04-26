@@ -13,11 +13,11 @@ import (
 type Question struct {
 	ID            string `dynamodbav:"ID"`
 	Question      string `dynamodbav:"Question"`
-	AnwserA       string `dynamodbav:"A"`
-	AnwserB       string `dynamodbav:"B"`
-	AnwserC       string `dynamodbav:"C"`
-	AnwserD       string `dynamodbav:"D"`
-	CorrectAnwser string `dynamodbav:"CorrectAnswer"`
+	AnswerA       string `dynamodbav:"A"`
+	AnswerB       string `dynamodbav:"B"`
+	AnswerC       string `dynamodbav:"C"`
+	AnswerD       string `dynamodbav:"D"`
+	CorrectAnswer string `dynamodbav:"CorrectAnswer"`
 }
 
 func (r *Repo) GetQuestion(questionID string) (Question, error) {
@@ -34,7 +34,7 @@ func (r *Repo) GetQuestion(questionID string) (Question, error) {
 		return Question{}, errors.New("could not retrieve question from dynamo")
 	}
 
-	log.Println("Succesfully retrieved question from dyanmo.")
+	log.Println("Successfully retrieved question from dynamo.")
 
 	question := Question{}
 	if err := dynamodbattribute.UnmarshalMap(queryOutput.Item, &question); err != nil {
@@ -55,10 +55,10 @@ func (r *Repo) CreateQuestion(in Question) (string, error) {
 		TableName: aws.String("personal-triviaQuestions"),
 		Item:      item,
 	}); err != nil {
-		return "", errors.New("could not put created question into dyanmo")
+		return "", errors.New("could not put created question into dynamo")
 	}
 
-	log.Printf("Succesfully created a question in dynamo with the ID %s", in.ID)
+	log.Printf("Successfully created a question in dynamo with the ID %s", in.ID)
 
 	return in.ID, nil
 }
