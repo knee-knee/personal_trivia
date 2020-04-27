@@ -18,7 +18,7 @@ func main() {
 	mw := middleware.New(repo)
 	r := mux.NewRouter()
 	// landing page
-	r.HandleFunc("/", helloWorld).Methods(http.MethodGet)
+	r.HandleFunc("/", healthCheck).Methods(http.MethodGet)
 
 	// questions
 	r.Handle("/question/{id}", mw.AuthMiddleware(routes.Question)).Methods(http.MethodGet)
@@ -27,10 +27,11 @@ func main() {
 
 	// users
 	r.HandleFunc("/signup", routes.CreateUser).Methods(http.MethodPost)
+	r.HandleFunc("/login", routes.Login).Methods(http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func helloWorld(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "hello world")
+func healthCheck(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "healthy")
 }

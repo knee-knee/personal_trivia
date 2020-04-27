@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -13,6 +14,11 @@ type User struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
 	Group    string `json:"group"`
+}
+
+type Login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (u User) ToDynamo() repo.User {
@@ -41,5 +47,42 @@ func (r *Routes) CreateUser(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	log.Printf("routes: Successfully created user with ID %s \n", resp)
+
 	w.Write([]byte(resp))
+}
+
+func (r *Routes) Login(w http.ResponseWriter, req *http.Request) {
+	var in Login
+	if err := json.NewDecoder(req.Body).Decode(&in); err != nil {
+		http.Error(w, "could not unmarshal login input", 500)
+		return
+	}
+
+	defer req.Body.Close()
+
+	if in.Email == "" || in.Password == "" {
+		fmt.Println("############################")
+		http.Error(w, "invalid email or password", http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("routes: Attempting to login user %s \n", in.Email)
+
+	resp, err := r.Repo.GetUserByEmail(in.Email)
+	if err != nil {
+		fmt.Println("****************************")
+		fmt.Println(err)
+		http.Error(w, "invalid email or password", http.StatusBadRequest)
+		return
+	}
+
+	if resp.Password != in.Password {
+		http.Error(w, "invalid email or password", http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("routes: Successfully logged in user %s \n", in.Email)
+
+	w.Write([]byte(resp.ID))
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/google/uuid"
 )
 
@@ -58,5 +59,35 @@ func (r *Repo) GetUser(userID string) (User, error) {
 	if err := dynamodbattribute.UnmarshalMap(queryOutput.Item, &user); err != nil {
 		return User{}, err
 	}
+	return user, nil
+}
+
+func (r *Repo) GetUserByEmail(email string) (User, error) {
+	log.Printf("Getting user with email %s. \n", email)
+
+	filt := expression.Name("email").Equal(expression.Value(email))
+	expr, err := expression.NewBuilder().WithFilter(filt).Build()
+	if err != nil {
+		return User{}, err
+	}
+
+	params := &dynamodb.ScanInput{
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+		Limit:                     aws.Int64(1),
+		TableName:                 aws.String("personal-triviaUsers"),
+	}
+	result, err := r.svc.Scan(params)
+	if err != nil {
+		return User{}, err
+	}
+
+	var user User
+	if err := dynamodbattribute.UnmarshalMap(result.Items[0], &user); err != nil {
+		return User{}, err
+	}
+
 	return user, nil
 }
