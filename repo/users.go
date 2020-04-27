@@ -62,6 +62,8 @@ func (r *Repo) GetUser(userID string) (User, error) {
 	return user, nil
 }
 
+// TODO: This is a scan right now because I dont want to pay for a GSI.
+// If there is ever a reason that I would want to pay for it make this a query.
 func (r *Repo) GetUserByEmail(email string) (User, error) {
 	log.Printf("Getting user with email %s. \n", email)
 

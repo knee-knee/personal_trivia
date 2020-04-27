@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -62,7 +61,6 @@ func (r *Routes) Login(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 
 	if in.Email == "" || in.Password == "" {
-		fmt.Println("############################")
 		http.Error(w, "invalid email or password", http.StatusBadRequest)
 		return
 	}
@@ -71,8 +69,6 @@ func (r *Routes) Login(w http.ResponseWriter, req *http.Request) {
 
 	resp, err := r.Repo.GetUserByEmail(in.Email)
 	if err != nil {
-		fmt.Println("****************************")
-		fmt.Println(err)
 		http.Error(w, "invalid email or password", http.StatusBadRequest)
 		return
 	}

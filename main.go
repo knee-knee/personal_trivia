@@ -29,6 +29,9 @@ func main() {
 	r.HandleFunc("/signup", routes.CreateUser).Methods(http.MethodPost)
 	r.HandleFunc("/login", routes.Login).Methods(http.MethodPost)
 
+	// groups
+	r.Handle("/group", mw.AuthMiddleware(routes.CreateGroup)).Methods(http.MethodPost)
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
