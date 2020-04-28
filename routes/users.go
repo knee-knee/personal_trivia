@@ -29,6 +29,10 @@ func (u User) ToDynamo() repo.User {
 	}
 }
 
+// Rules for creating a user:
+// 	1. Email is unique
+// 	2. Username is unique
+// 	3. Group is a valid group ID.
 // TODO: we need to check first that the username and email are unique.
 func (r *Routes) CreateUser(w http.ResponseWriter, req *http.Request) {
 	log.Println("routes: Starting to create user")
@@ -39,6 +43,48 @@ func (r *Routes) CreateUser(w http.ResponseWriter, req *http.Request) {
 	}
 
 	defer req.Body.Close()
+
+	// Check if email is unique.
+	user, err := r.Repo.GetUserScan(repo.UserScanInput{
+		Key:   "email",
+		Value: in.Email,
+	})
+	if err != nil {
+		log.Printf("routes: could not scan for user based off email %v", err)
+		http.Error(w, "internall server error", 500)
+		return
+	}
+	if (user != repo.User{}) {
+		http.Error(w, "user with email already exists", 400)
+		return
+	}
+
+	// Check if username is unique.
+	user, err = r.Repo.GetUserScan(repo.UserScanInput{
+		Key:   "username",
+		Value: in.Username,
+	})
+	if err != nil {
+		log.Printf("routes: could not scan for user based off username %v \n", err)
+		http.Error(w, "internall server error", 500)
+		return
+	}
+	if (user != repo.User{}) {
+		http.Error(w, "user with username already exists", 400)
+		return
+	}
+
+	// Check if group is valid.
+	group, err := r.Repo.GetGroup(in.Group)
+	if err != nil {
+		log.Printf("routes: could not retrieve group from dynamo %v \n", err)
+		http.Error(w, "internall server error", 500)
+		return
+	}
+	if (group == repo.Group{}) {
+		http.Error(w, "Trying to create a user in an invalid group", http.StatusBadRequest)
+		return
+	}
 
 	resp, err := r.Repo.CreateUser(in.ToDynamo())
 	if err != nil {
@@ -67,7 +113,10 @@ func (r *Routes) Login(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("routes: Attempting to login user %s \n", in.Email)
 
-	resp, err := r.Repo.GetUserByEmail(in.Email)
+	resp, err := r.Repo.GetUserScan(repo.UserScanInput{
+		Key:   "email",
+		Value: in.Email,
+	})
 	if err != nil {
 		http.Error(w, "invalid email or password", http.StatusBadRequest)
 		return

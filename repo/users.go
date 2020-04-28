@@ -2,6 +2,7 @@ package repo
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -64,10 +65,11 @@ func (r *Repo) GetUser(userID string) (User, error) {
 
 // TODO: This is a scan right now because I dont want to pay for a GSI.
 // If there is ever a reason that I would want to pay for it make this a query.
-func (r *Repo) GetUserByEmail(email string) (User, error) {
-	log.Printf("Getting user with email %s. \n", email)
+// Also this is kind of shit because I assume you are only going to get one record back.
+func (r *Repo) GetUserScan(in UserScanInput) (User, error) {
+	log.Printf("Getting user by scanning off the %s. \n", in.Key)
 
-	filt := expression.Name("email").Equal(expression.Value(email))
+	filt := expression.Name(in.Key).Equal(expression.Value(in.Value))
 	expr, err := expression.NewBuilder().WithFilter(filt).Build()
 	if err != nil {
 		return User{}, err
@@ -86,10 +88,23 @@ func (r *Repo) GetUserByEmail(email string) (User, error) {
 		return User{}, err
 	}
 
+	if result.Count == nil {
+		fmt.Println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+		return User{}, errors.New("count of scan was empty")
+	}
+	if *result.Count == 0 {
+		return User{}, nil
+	}
+
 	var user User
 	if err := dynamodbattribute.UnmarshalMap(result.Items[0], &user); err != nil {
 		return User{}, err
 	}
 
 	return user, nil
+}
+
+type UserScanInput struct {
+	Key   string
+	Value string
 }
