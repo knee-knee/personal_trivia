@@ -2,7 +2,6 @@ package repo
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -89,7 +88,6 @@ func (r *Repo) GetUserScan(in UserScanInput) (User, error) {
 	}
 
 	if result.Count == nil {
-		fmt.Println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
 		return User{}, errors.New("count of scan was empty")
 	}
 	if *result.Count == 0 {

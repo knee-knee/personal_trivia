@@ -39,6 +39,20 @@ func (r *Routes) CreateGroup(w http.ResponseWriter, req *http.Request) {
 	creator := req.Header.Get(AuthHeader)
 	in.Creator = &creator
 
+	// Check to make sure that the group name has not been created before.
+	groupCheck, err := r.Repo.GetGroupsScan(repo.GroupScanInput{
+		Key:   "name",
+		Value: aws.StringValue(in.Name),
+	})
+	if err != nil {
+		log.Printf("routes: could not scan for group based off name, error: %v \n", err)
+		http.Error(w, "Internal Server Error", 500)
+	}
+	if (groupCheck != repo.Group{}) {
+		http.Error(w, "group name already exists", 400)
+		return
+	}
+
 	resp, err := r.Repo.CreateGroup(in.ToDynamo())
 	if err != nil {
 		http.Error(w, "could not create user", 500)
